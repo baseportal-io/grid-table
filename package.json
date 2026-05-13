@@ -1,0 +1,89 @@
+{
+  "name": "@baseportal/grid-table",
+  "version": "0.1.0",
+  "description": "Fast canvas-rendered data grid for React. Built on glide-data-grid with first-class support for millions of rows, paginated/infinite scrolling, draft rows, app-supplied overlay editors, and a Material-UI theme bridge.",
+  "license": "MIT",
+  "author": "Baseportal <oss@baseportal.io>",
+  "homepage": "https://github.com/baseportal-io/grid-table#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/baseportal-io/grid-table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/baseportal-io/grid-table/issues"
+  },
+  "keywords": [
+    "react",
+    "datagrid",
+    "data-grid",
+    "table",
+    "canvas",
+    "virtualized",
+    "windowed",
+    "glide-data-grid",
+    "infinite-scroll",
+    "pagination",
+    "spreadsheet",
+    "airtable",
+    "baseportal"
+  ],
+  "type": "module",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs.js"
+    }
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@glideapps/glide-data-grid": "^6.0.3",
+    "@glideapps/glide-data-grid-cells": "^6.0.3",
+    "lodash": "^4.17.21",
+    "marked": "^4.3.0",
+    "react-responsive-carousel": "^3.2.23"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.13",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ],
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "@glideapps/glide-data-grid>react": "19",
+        "@glideapps/glide-data-grid>react-dom": "19"
+      }
+    }
+  }
+}
