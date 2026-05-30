@@ -282,6 +282,7 @@ const {
   isInitialLoading,
   error,
   refresh,
+  patchRow,
   commitEdit,
   appendDraftRow,
   isDraftRow,
@@ -339,6 +340,42 @@ spread + set key), then calls your `onPersistEdit`. The contract:
 
 \* The hook merges partial returns rather than replacing the whole row, so two
 rapid edits in different columns don't clobber each other.
+
+### Side-band cache writes (`patchRow`)
+
+Sometimes an editor learns about row metadata that isn't the cell's value.
+The canonical case is an attachment editor: the cell's value is an array of
+file ids (PATCH-ed via `commitEdit`), but the editor also fetched a
+**signed URL** for each upload — that URL belongs on the row as a companion
+field (e.g. `${fieldName}Urls`) so re-opening the editor renders thumbnails
+without re-fetching.
+
+`patchRow(rowIndex, partial)` writes the partial straight onto the cached
+row. No persist, no `onPersistEdit` round-trip, no refetch — just a local
+merge that fires a re-render of the affected cells.
+
+```tsx
+function AttachmentEditor({ context, onChange }: GridCustomEditorProps) {
+  const { patchRow } = useEditorContext() // app-supplied context
+  const { fieldName, rowIndex } = context as { fieldName: string; rowIndex: number }
+
+  const handleUpload = async (files: FileList) => {
+    const uploaded = await uploadAll(files) // [{ id, url, mimeType, ... }, ...]
+    onChange(uploaded.map((u) => u.id))                       // value → commit
+    patchRow(rowIndex, { [`${fieldName}Urls`]: uploaded })    // metadata → cache
+  }
+  // …
+}
+```
+
+When to reach for it vs. returning a partial from `onPersistEdit`:
+
+- **`patchRow`** — declarative, immediate, independent of any commit. Use
+  when the metadata is learned in the editor and should land on the row
+  whether or not a `commitEdit` follows.
+- **`onPersistEdit` return-partial** — bundled with the persist's
+  reconciliation. Use when the server's response carries the metadata
+  (real id after a draft create, normalized timestamps, etc.).
 
 ### Draft rows ("+ New row")
 
@@ -518,8 +555,8 @@ Imperative handle via `useRef<GridTableRef>`:
 | `makeDraftRow`   |          | `() => TRow` — required to enable `appendDraftRow`.                      |
 
 Returns `{ rowCount, getRow, onVisibleRowsChange, isInitialLoading, error,
-refresh, commitEdit, appendDraftRow, isDraftRow, page, setPage, pageCount,
-total }`.
+refresh, patchRow, commitEdit, appendDraftRow, isDraftRow, page, setPage,
+pageCount, total }`.
 
 ### `glideThemeFromMui(muiTheme)`
 
