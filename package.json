@@ -1,6 +1,6 @@
 {
   "name": "@baseportal/grid-table",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fast canvas-rendered data grid for React. Built on glide-data-grid with first-class support for millions of rows, paginated/infinite scrolling, draft rows, app-supplied overlay editors, and a Material-UI theme bridge.",
   "license": "MIT",
   "author": "Baseportal <it@baseportal.io>",

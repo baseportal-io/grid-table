@@ -64,6 +64,14 @@ export interface UseGridDataResult<TRow> {
   error: unknown
   /** Drop the cache and draft rows and refetch (also happens when `resetKey` changes). */
   refresh: () => void
+  /**
+   * Merge a partial into the cached row at `rowIndex` without persisting or
+   * triggering `onPersistEdit`. Useful for companion fields the editor learns
+   * about side-band — e.g. an attachment editor that already uploaded the file
+   * and got back its signed URL needs to write the URL metadata onto the row
+   * without going through the cell value PATCH.
+   */
+  patchRow: (rowIndex: number, partial: Record<string, unknown>) => void
   /** Apply an inline edit at `rowIndex` — optimistic update + `onPersistEdit`. */
   commitEdit: (edit: {
     rowIndex: number
@@ -385,6 +393,26 @@ export function useGridData<TRow>(
     resetAndReload(mode === 'paginated' ? page : 1)
   }, [resetAndReload, mode, page])
 
+  const patchRow = React.useCallback(
+    (rowIndex: number, partial: Record<string, unknown>) => {
+      if (rowIndex < 0) return
+      if (rowIndex >= serverRowCount) {
+        mergeDraftPartial(rowIndex - serverRowCount, partial)
+        return
+      }
+      const p = pageOf(rowIndex)
+      const localIdx = localIndexOf(rowIndex)
+      mergeServerRowPartial(p, localIdx, partial)
+    },
+    [
+      serverRowCount,
+      pageOf,
+      localIndexOf,
+      mergeDraftPartial,
+      mergeServerRowPartial
+    ]
+  )
+
   const pageCount = pageSize > 0 ? Math.ceil(total / pageSize) : 0
 
   return {
@@ -394,6 +422,7 @@ export function useGridData<TRow>(
     isInitialLoading,
     error,
     refresh,
+    patchRow,
     commitEdit,
     appendDraftRow,
     isDraftRow,
